@@ -31,19 +31,92 @@ const buttonVariants = cva(
   }
 );
 
+function Spinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("size-4 animate-spin", className)}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+      />
+    </svg>
+  );
+}
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  /**
+   * Text or content displayed inside the button.
+   * Can be a string or any React node (icons, spans, etc.).
+   */
+  children?: React.ReactNode;
+  /**
+   * Visual style of the button.
+   * @default "primary"
+   */
+  variant?: "primary" | "secondary" | "ghost" | "destructive" | "outline";
+  /**
+   * Size of the button.
+   * @default "md"
+   */
+  size?: "sm" | "md" | "lg";
+  /**
+   * When true, shows a spinner and disables the button.
+   * Useful while an async action (fetch, submit) is in progress.
+   * @default false
+   */
+  loading?: boolean;
+  /**
+   * HTML button type.
+   * - "button": default, does not submit forms
+   * - "submit": submits the closest <form>
+   * - "reset": resets the closest <form>
+   * @default "button"
+   */
+  type?: "button" | "submit" | "reset";
+}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, type = "button", ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      type = "button",
+      loading = false,
+      disabled,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <button
         type={type}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
         {...props}
-      />
+      >
+        {loading && <Spinner />}
+        {children}
+      </button>
     );
   }
 );

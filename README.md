@@ -1,6 +1,6 @@
 # Base Components
 
-Dynamic component library for Next.js, documented with Storybook.
+A dynamic component library for Next.js with a showcase site where you can preview each component live and copy its code straight into your project.
 
 ## Development
 
@@ -11,34 +11,40 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Storybook
+## How it works
 
-This project uses [Storybook 10](https://storybook.js.org/) with the `@storybook/nextjs-vite` framework (the official builder for Next.js 16).
+The Next.js app is the showcase:
 
-```bash
-npm run storybook        # dev server on http://localhost:6006
-npm run build-storybook  # static build in storybook-static/
+- **`/`** — home page with a grid of all components
+- **`/showcase/[slug]`** — per-component page with:
+  - a **live preview** rendered from the real component
+  - a **requirements** section (Tailwind v4, npm dependencies, theme tokens)
+  - the **full source code** (self-contained — `cn()` is inlined) with a **Copy** button
+
+The user browses → picks a component → copies → pastes into their project. Done.
+
+## Adding a new component
+
+1. Create the component in `components/<Name>/<Name>.tsx` (self-contained styling via cva + `cn()` from `@/lib/utils`)
+2. Register it in `lib/showcase.ts` (slug, name, description, default props for the preview, dependencies)
+3. It appears automatically in the sidebar, home grid, and its showcase page
+
+## Structure
+
 ```
-
-### How it's set up
-
-- `.storybook/main.ts` — framework, addons, and story globs pointing to `components/**`
-- `.storybook/preview.tsx` — imports `app/globals.css` so **Tailwind v4** works inside stories
-- Addons: docs, accessibility (a11y), vitest, MCP, Chromatic
-- Testing: Vitest + Playwright are configured (`vitest.config.ts`) — write `play` functions in stories and run them headless with `npx vitest storybook`
-
-## Component structure
-
-Each component lives in its own folder with its story colocated next to it:
-
-```
+app/
+├── page.tsx                 ← home: component grid
+└── showcase/[slug]/page.tsx ← per-component showcase page
 components/
-  <Component>/
-    <Component>.tsx
-    <Component>.stories.tsx
-    index.ts
+├── <Name>/<Name>.tsx        ← the actual components (source of truth)
+└── showcase/                ← showcase site pieces (CopyButton, CodeBlock)
+lib/
+├── showcase.ts              ← component catalog
+└── showcase-code.ts         ← reads source + inlines cn() for copy-paste
 ```
 
-Imports use the `@/*` alias (configured in `tsconfig.json`), for example `@/components/Button`.
+## Stack
 
-Storybook picks up new stories automatically — just restart `npm run storybook` if it was already running when you created the file.
+- Next.js 16 (App Router) + React 19
+- Tailwind CSS v4
+- cva + clsx + tailwind-merge (component variants)
